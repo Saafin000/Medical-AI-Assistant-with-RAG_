@@ -46,17 +46,28 @@ def data_ingestion():
         dir_path = args.dir
         # Process and ingest the files
         result = rag.ingest_directory(dir_path)
+    else:
+        # No file or directory specified
+        result = {"success": False, "error": "No file or directory specified"}
 
     print("Ingestion result:", json.dumps(result, indent=2))
 
-    return result["success"]
+    # Return both success status and result dict
+    success = result.get("success", False) or result.get("partial_success", False)
+    return success, result
 
 # Run tests
 if __name__ == "__main__":
    
     print("\nIngesting document(s)...")
 
-    ingestion_success = data_ingestion()
+    ingestion_success, result = data_ingestion()
     
     if ingestion_success:
-        print("\nSuccessfully ingested the documents.")
+        if result.get("partial_success"):
+            print("\n⚠️  PARTIAL SUCCESS: Some documents ingested, others failed.")
+            print(f"   Ingested: {result.get('documents_ingested', 0)}, Failed: {result.get('failed_documents', 0)}")
+        else:
+            print("\n✅ SUCCESS: All documents ingested successfully.")
+    else:
+        print("\n❌ FAILURE: No documents were ingested. Check errors above.")

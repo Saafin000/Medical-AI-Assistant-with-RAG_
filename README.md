@@ -219,8 +219,9 @@ embedding_openai_api_version=
 # Speech API Key (Free credits available with new Eleven Labs Account)
 ELEVEN_LABS_API_KEY=
 
-# Web Search API Key (Free credits available with new Tavily Account)
-TAVILY_API_KEY=
+# Web Search (DuckDuckGo - No API key required)
+# DuckDuckGo search is integrated via the `ddgs` package (installed in requirements.txt)
+# No API key configuration needed for web search functionality
 
 # Hugging Face Token - using reranker model "ms-marco-TinyBERT-L-6"
 HUGGINGFACE_TOKEN=

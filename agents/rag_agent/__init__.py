@@ -87,8 +87,13 @@ class MedicalRAG:
                     failed_ingestions += 1
                     failed_files.append({"file": file_path, "error": str(e)})
             
+            # Determine success/partial_success based on ingestion results
+            has_successes = successful_ingestions > 0
+            has_failures = failed_ingestions > 0
+            
             return {
-                "success": True,
+                "success": has_successes and not has_failures,  # True only if all succeed
+                "partial_success": has_successes and has_failures,  # True if mixed
                 "documents_ingested": successful_ingestions,
                 "failed_documents": failed_ingestions,
                 "failed_files": failed_files,

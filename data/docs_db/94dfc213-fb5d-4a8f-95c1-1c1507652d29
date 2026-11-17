@@ -1,0 +1,17 @@
+In addition, the area under the receiver operating characteristic (ROC) curve, commonly referred to as the "area under the curve", succinctly summarizes the overall model performance in a single metric. The AUC value ranges from 0 to 1, with values closer to 1 indicating the increased discriminative ability of the   model 26 . The ROC curve and AUC value serve as essential tools for comparing models and understanding classification model performance. A higher AUC value generally indicates superior model performance, while the curve illustrates the model's performance strengths and weaknesses at various   thresholds 26 .
+
+## Approval for participation
+
+As the data is open source, there are no experiments on humans conducted by the authors. Open source has been studied on MRI images.
+
+## Experimental settings and results
+
+This study addresses the problem of image classification using deep learning methods. The most important and widely studied of these problems is that of health images. In this context, five different models (InceptionV3, EfficientNetB4, VGG16, VGG19, Multi-Layer CNN) were selected for the classification of brain tumors and their performances were compared on the same dataset. 10% of the dataset was used for testing, 15% for validation and 75% for training. All experimental setup and results were done at Google Colab.
+
+## Multi-layer CNN
+
+First, we need to determine the architecture of our model. The input form of our data is 400 × 400 and has 3 channels. Since we have a total of 4 different classes, the number of output classes is set to 4. Our model has a structure that includes convolutional and pooling layers. First, there is a 3 × 3 convolutional layer with 32 filters. This is followed by a 2 × 2 max pooling layer. This reduces the size by emphasizing lower-level features. To deepen our model, this structure is repeated twice, adding convolutional layers with 64 and 128 filters, respectively, and maximum pooling layers of size 2 × 2.
+
+Table 2. Confusion matrix.
+
+picture_counter_2 no image summary

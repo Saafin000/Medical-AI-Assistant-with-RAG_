@@ -25,10 +25,10 @@ class MedicalDocParser:
             self,
             document_path: str,
             output_dir: str,
-            image_resolution_scale: float = 2.0,
+            image_resolution_scale: float = 1.0,
             do_ocr: bool = True,
             do_tables: bool = True,
-            do_formulas: bool = True,
+            do_formulas: bool = False,
             do_picture_desc: bool = False
         ) -> Tuple[Any, List[str]]:
         """

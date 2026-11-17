@@ -1,0 +1,31 @@
+Using this feature allows for more stable and efficient model training, streamlining the process of fine-tuning training parameters without the need to manually adjust the learning rate. The training program was run over 14 epochs with batches of size 10. Details of the multilayer CNN model used in the study are presented in Fig. 2, which outlines its architectural features.
+
+The training and validation accuracy loss graphs of the models created with VGG19, EfficientNetB4, InceptionV3 transfer learning, and CNN are shown in Fig. 3.
+
+Table 3 shows the accuracy, F-score, Recall, Precision and AUC results of the models created in the study.
+
+Figure 2. Multi-layer CNN model arthitecture.
+
+picture_counter_3 no image summary
+
+Vol.:(0123456789)
+
+<!-- page_break -->
+
+Vol:.(1234567890)
+
+Figure 3. Learning curves of losses and accuracies of ( a ) CNN model, ( b ) EfficientNetB4 model, ( c ) VGG19 model, ( d ) InceptionV3, ( e ) VGG16 model.
+
+picture_counter_4 no image summary
+
+Table 3. Performances (%) of the models created in the study.
+
+| Models         |   Accuracy |   F-score |   Recall |   Precision |   AUC |
+|----------------|------------|-----------|----------|-------------|-------|
+| VGG19          |         96 |        96 |       96 |          96 |    99 |
+| EfficientNETB4 |         97 |        96 |       97 |          97 |    99 |
+| InceptionV3    |         96 |        96 |       96 |          96 |    99 |
+| 3 CNNModel     |         91 |        90 |       91 |          91 |    98 |
+| VGG16          |         98 |        97 |       98 |          98 |    99 |
+
+According to Table 3, the best accuracy result was obtained by VGG16 with 97%. It is ahead of other methods with F-score value of 97%, AUC value of 99%, recall value of 98% and precision values of 98%. The ROC curves of the models created in the study are shown in Fig. 4.

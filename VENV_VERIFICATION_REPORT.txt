@@ -1,0 +1,152 @@
+================================================================================
+VENV ENVIRONMENT VERIFICATION REPORT
+================================================================================
+
+Project: Multi-Agent-Medical-Assistant
+Directory: C:\Users\saafi\OneDrive\Desktop\Multi-Agent-Medical-Assistant\Multi-Agent-Medical-Assistant
+Venv Location: .\venv
+
+================================================================================
+[1] PYTHON ENVIRONMENT
+================================================================================
+
+Version:     Python 3.11.0
+Executable:  C:\Users\saafi\OneDrive\Desktop\Multi-Agent-Medical-Assistant\Multi-Agent-Medical-Assistant\venv\Scripts\python.exe
+Prefix:      C:\Users\saafi\OneDrive\Desktop\Multi-Agent-Medical-Assistant\Multi-Agent-Medical-Assistant\venv
+Status:      PROJECT VIRTUAL ENVIRONMENT CONFIRMED
+
+================================================================================
+[2] INSTALLED PACKAGE VERSIONS
+================================================================================
+
+Package                    Required      Installed    Match
+------                     --------      ---------    -----
+langchain                  0.3.20        0.3.20       OK
+langchain-core             0.3.44        1.8.1        MISMATCH (0.3.44 vs 1.8.1)
+langchain-community        0.3.19        0.3.19       OK
+langchain-classic          N/A           NOT INST.    NOT INSTALLED
+langchain-qdrant           0.2.0         0.2.0        OK
+langchain-text-splitters   0.3.6         0.3.6        OK
+docling                    2.31.0        2.31.0       OK
+
+================================================================================
+[3] IMPORT TEST RESULTS
+================================================================================
+
+Test 1: from langchain.storage import InMemoryStore, LocalFileStore
+  Status:   SUCCESS
+  Module:   langchain.storage (built-in to langchain 0.3.20)
+  Classes:  InMemoryStore, LocalFileStore
+  Note:     WORKING IN VENV
+
+Test 2: from langchain_classic.storage import InMemoryStore, LocalFileStore
+  Status:   FAILED
+  Error:    ModuleNotFoundError: No module named 'langchain_classic'
+  Note:     langchain-classic NOT INSTALLED in venv
+
+Test 3: from langchain_classic.storage import LocalFileStore
+  Status:   FAILED
+  Error:    ModuleNotFoundError: No module named 'langchain_classic'
+  Note:     langchain-classic NOT INSTALLED in venv
+
+Test 4: from langchain_core.stores import InMemoryStore
+  Status:   SUCCESS
+  Module:   langchain_core.stores
+  Class:    InMemoryStore
+  Note:     WORKING IN VENV
+
+Test 5: from docling.datamodel.base_models import InputFormat
+  Status:   SUCCESS
+  Module:   docling.datamodel.base_models
+  Class:    InputFormat
+  Note:     WORKING IN VENV
+
+================================================================================
+[4] KEY FINDINGS
+================================================================================
+
+CRITICAL DISCOVERY:
+  The project venv has langchain 0.3.20 which DOES include langchain.storage
+  
+  The broken import "from langchain.storage import InMemoryStore, LocalFileStore"
+  actually WORKS in the project venv!
+  
+  Previous diagnostic used global Python 3.10 (not the venv) which had:
+    - langchain 1.3.9 (no langchain.storage module)
+    - langchain-classic 1.0.8 (has langchain_classic.storage)
+  
+  The venv uses langchain 0.3.20 which:
+    - HAS langchain.storage module
+    - Does NOT have langchain_classic
+
+VERSION MISMATCH:
+  langchain-core: requirements.txt specifies 0.3.44 but venv has 1.8.1
+  This is a significant version jump and may cause issues elsewhere
+
+WORKING IN VENV:
+  All required imports work:
+    ✓ from langchain.storage import InMemoryStore, LocalFileStore
+    ✓ from langchain_core.stores import InMemoryStore
+    ✓ from docling.datamodel.base_models import InputFormat
+  
+  BUT:
+  langchain-classic is NOT installed (not in requirements.txt anyway)
+
+================================================================================
+[5] REQUIREMENTS.TXT COMPLIANCE
+================================================================================
+
+Matching:
+  langchain: 0.3.20 ✓
+  langchain-community: 0.3.19 ✓
+  langchain-qdrant: 0.2.0 ✓
+  langchain-text-splitters: 0.3.6 ✓
+  docling: 2.31.0 ✓
+
+Mismatching:
+  langchain-core: requires 0.3.44, venv has 1.8.1 ⚠️
+
+Not in requirements.txt (but in venv):
+  langchain-classic: NOT INSTALLED (was only in global Python 3.10)
+
+================================================================================
+[6] CONCLUSION
+================================================================================
+
+STATUS: THE PROJECT VENV IS CORRECTLY CONFIGURED
+
+The broken import issue does NOT exist in the project venv:
+  - langchain 0.3.20 has langchain.storage module
+  - Both InMemoryStore and LocalFileStore are importable
+  - docling is installed and working
+  - All required imports succeed
+
+The confusion arose from:
+  - Previous diagnostic used global Python 3.10 (with different packages)
+  - Global Python had langchain 1.3.9 (no langchain.storage)
+  - Venv has langchain 0.3.20 (has langchain.storage)
+  
+ACTION REQUIRED: Use the project venv, not global Python!
+
+Version mismatch to investigate:
+  - langchain-core: 0.3.44 (required) vs 1.8.1 (installed)
+  - This is a significant upgrade and could affect compatibility
+
+================================================================================
+SUMMARY
+================================================================================
+
+Current Status in Project Venv:
+  ✓ Python 3.11.0
+  ✓ langchain 0.3.20 (has langchain.storage)
+  ✓ docling 2.31.0 (installed)
+  ✓ All required imports working
+  ✓ Requirements mostly matched (except langchain-core)
+
+Next Step:
+  Run retrieval tests using: .\venv\Scripts\python.exe
+  NOT using global python or python.exe
+
+The retrieval pipeline should work if using the venv interpreter!
+
+================================================================================

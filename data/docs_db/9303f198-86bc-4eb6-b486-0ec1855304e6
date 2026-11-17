@@ -1,0 +1,27 @@
+Brain tumors affect human health due to their   location . AI is designed to help diagnose and treat complex 1 diseases such as brain tumors by combining technologies such as big data analytics, machine learning, and deep learning. AI has the ability to detect and classify tumors by analyzing brain imaging techniques, such as Magnetic Resonance Imaging (MRI). AI algorithms can help determine the size, location, class, and aggressiveness of tumors. This helps physicians make a more accurate diagnosis and treatment plan, and helps patients better understand their health.
+
+AI can also be used to track a patient's progress through treatment. AI-based analytics can be used to assess treatment response and predict potential tumor recurrence. In this way, patients' treatment plans can be more effectively organized and individualized treatment approaches can be developed.
+
+In this study, difference detection was performed on brain images. Classification was performed with multilayer CNN and CNN-based transfer learning methods on 4 classes labeled by physicians.
+
+The contribution of the study is as follows.
+
+- · We investigate the transfer learning method with the highest performance in the classification process of transfer learning methods on brain images.
+- · We investigate the performance of CNN and transfer learning on brain images using CNN as a multi-layer without using transfer learning.
+- · We investigate whether it is possible to achieve good results with a skewed and poor quality dataset.
+
+The flow diagram of the study is shown in Fig. 1.
+
+ͷ Ataşehir Bil Anatolian High School, ͹ͺͽ͸Ͷ Istanbul, Turkey. ͸ Department of Computer Engineering, Faculty  of  Engineering  and  Natural  Sciences,  Istanbul  Medeniyet  University,  ͹ͺ;;ͻ  Istanbul,  Turkey. * email: muhammet.basarslan@medeniyet.edu.tr glyph&lt;c=25,font=/HXRIKF+Corbel&gt;
+
+ol.:ȋͬͭͮͯ
+
+<!-- page_break -->
+
+Vol:.(1234567890)
+
+Figure 1. Flow diagram of the work.
+
+picture_counter_1 no image summary
+
+Studies on brain tumors in the last 5 years will be scanned from indexes such as WOS and IEEE and the details of the related studies will be explained in this section.

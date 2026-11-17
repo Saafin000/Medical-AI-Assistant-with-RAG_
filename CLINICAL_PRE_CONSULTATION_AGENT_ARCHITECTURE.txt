@@ -1,0 +1,999 @@
+================================================================================
+CLINICAL PRE-CONSULTATION AGENT - ARCHITECTURE ANALYSIS
+================================================================================
+
+Project: Multi-Agent Medical Assistant
+Date: 2026-11-17
+Type: READ-ONLY Architecture Inspection
+Status: COMPLETE - READY FOR DESIGN AND PLANNING
+
+================================================================================
+[A: CURRENT ARCHITECTURE SUMMARY]
+================================================================================
+
+1. MULTI-AGENT SYSTEM OVERVIEW
+
+Framework: LangGraph (state machine-based orchestration)
+Entry Point: FastAPI endpoint /chat (app.py)
+Routing: Agent Decision system in agents/agent_decision.py
+State Management: MessagesState (conversation history + workflow state)
+Database: Qdrant (vector store) + LocalFileStore (document metadata)
+Configuration: Centralized in config.py (Config class)
+
+2. CURRENT AGENTS
+
+A. CONVERSATION_AGENT
+   - Type: General dialogue
+   - Model: ChatGroq (qwen/qwen3.8-27b, temperature=0.7)
+   - Invoked by: Agent Decision when query is general conversation
+   - Function: run_conversation_agent() in agent_decision.py:235
+
+B. RAG_AGENT
+   - Type: Knowledge retrieval + response generation
+   - Class: MedicalRAG (agents/rag_agent/__init__.py)
+   - Model: ChatGroq (qwen/qwen3.8-27b, temperature=0.3)
+   - Components:
+     * MedicalDocParser (Docling-based parsing)
+     * ContentProcessor (chunking + embedding)
+     * VectorStore (Qdrant integration)
+     * Reranker (cross-encoder reranking)
+     * QueryExpander (semantic expansion)
+     * ResponseGenerator (LLM-based response)
+   - Invoked by: Agent Decision when RAG_AGENT selected
+   - Function: run_rag_agent() in agent_decision.py:319
+
+C. WEB_SEARCH_PROCESSOR_AGENT
+   - Type: Real-time medical information
+   - Class: WebSearchProcessorAgent (agents/web_search_processor_agent/)
+   - Model: ChatGroq (qwen/qwen3.8-27b, temperature=0.3)
+   - Providers: DuckDuckGo (primary), PubMed (optional)
+   - Invoked by: Agent Decision OR auto-fallback from RAG (low confidence)
+   - Function: run_web_search_agent() in agent_decision.py
+
+D. MEDICAL VISION AGENTS (Image Analysis)
+   - BRAIN_TUMOR_AGENT: Brain MRI analysis
+   - CHEST_XRAY_AGENT: Chest X-ray analysis
+   - SKIN_LESION_AGENT: Skin lesion classification
+   - Invoked by: Agent Decision when images uploaded
+   - Requires: Human validation after analysis
+
+3. ORCHESTRATION FLOW
+
+   User Input (/chat endpoint)
+       ↓
+   process_query() in agent_decision.py
+       ↓
+   create_agent_graph() - LangGraph state machine
+       ↓
+   Nodes (in order):
+   1. analyze_input() - Detect images, run guardrails
+   2. check_if_bypassing() - Check guardrail violations
+   3. route_to_agent() - Decision model selects agent
+   4. execute_agent() - Run selected agent
+   5. apply_guardrails() - Output validation (if needed)
+   6. END
+
+   Agent Execution:
+   - run_conversation_agent()
+   - run_rag_agent()
+   - run_web_search_agent()
+   - run_brain_tumor_agent()
+   - run_chest_xray_agent()
+   - run_skin_lesion_agent()
+
+4. DATA FLOW
+
+   State Object: AgentState (TypedDict in agent_decision.py)
+   ├── messages: List[BaseMessage] - Conversation history
+   ├── agent_name: str - Current agent
+   ├── current_input: str | Dict - User query
+   ├── has_image: bool
+   ├── image_type: str
+   ├── output: str - Agent response
+   ├── retrieval_confidence: float
+   ├── needs_human_validation: bool
+   └── bypass_routing: bool
+
+   Message Flow:
+   - Input: HumanMessage added to state["messages"]
+   - Processing: Agent updates state
+   - Output: AIMessage added to state["messages"]
+   - Return: Final state["messages"][-1].content sent to user
+
+5. LLM CONFIGURATION
+
+   All LLMs use Groq API:
+   - Model: qwen/qwen3.8-27b (consistent across all agents)
+   - Temperature varies by task:
+     * Decision: 0.1 (deterministic)
+     * Conversation: 0.7 (creative)
+     * RAG: 0.3 (factual)
+     * Web Search: 0.3 (factual)
+     * Vision: 0.1 (deterministic)
+
+   Embeddings:
+   - Model: sentence-transformers/all-MiniLM-L6-v2
+   - Dimensions: 384
+   - Provider: HuggingFace (local)
+
+6. DATABASE SETUP
+
+   Location: ./data/
+   
+   A. Qdrant Vector Store
+      - Path: ./data/qdrant_db/
+      - Collection: medical_assistance_rag_hf
+      - Points: 163 (after recent ingestion)
+      - Distance Metric: Cosine
+      - Sparse Vectors: BM25 (enabled)
+   
+   B. LocalFileStore
+      - Path: ./data/docs_db/
+      - Format: SQLite
+      - Stores: Document metadata + chunks
+      - Current: 4 documents (diabetes.pdf, brain_tumor_2024.pdf, etc.)
+   
+   C. Parsed Content
+      - Path: ./data/parsed_docs/
+      - Content: Extracted images from PDFs
+      - Format: PNG files
+
+7. SESSION MANAGEMENT
+
+   - Session ID: UUID-based cookie (set in response)
+   - Persistence: Memory-based (MemorySaver from LangGraph)
+   - Thread Config: {"configurable": {"thread_id": "1"}}
+   - Conversation History: Max 20 messages (config.max_conversation_history)
+
+================================================================================
+[B: FILES REQUIRING NEW CODE]
+================================================================================
+
+1. NEW AGENT IMPLEMENTATION (4-5 files)
+
+   agents/clinical_pre_consultation_agent/
+   ├── __init__.py
+   │   └── ClinicalPreConsultationAgent class
+   │       - __init__(config)
+   │       - process_patient_info() -> Dict
+   │       - collect_symptoms() -> str
+   │       - generate_followup_questions() -> List[str]
+   │       - detect_red_flags() -> Dict
+   │       - request_context_from_rag(topic) -> str
+   │       - request_context_from_web_search(query) -> str
+   │       - generate_report() -> str
+   │
+   ├── patient_info_collector.py
+   │   └── PatientInfoCollector class
+   │       - collect_demographics() -> Dict
+   │       - collect_medical_history() -> Dict
+   │       - collect_symptoms() -> Dict
+   │       - collect_vitals() -> Dict
+   │       - validate_collected_data() -> bool
+   │
+   ├── followup_question_generator.py
+   │   └── FollowupQuestionGenerator class
+   │       - generate_adaptive_questions(context) -> List[str]
+   │       - select_next_question(history) -> str
+   │
+   ├── red_flag_detector.py
+   │   └── RedFlagDetector class
+   │       - detect_emergencies(symptoms, vitals) -> List[str]
+   │       - assess_severity(flags) -> str
+   │       - generate_guidance(severity) -> str
+   │
+   └── report_generator.py
+       └── ReportGenerator class
+           - compile_patient_data() -> Dict
+           - structure_for_doctor(data) -> str
+           - include_recommendations(data) -> str
+
+2. DATABASE SCHEMA EXTENSION (1 file)
+
+   agents/clinical_pre_consultation_agent/
+   └── patient_database.py
+       └── PatientSessionStore class
+           - save_session(session_id, patient_data) -> bool
+           - load_session(session_id) -> Dict
+           - update_session(session_id, data) -> bool
+
+   Database Storage Options:
+   - Option A: Extend LocalFileStore (SQLite) with new tables
+     * patients_table: session_id, demographics, medical_history
+     * symptoms_table: session_id, symptom, severity, duration
+     * vitals_table: session_id, vital_sign, value, timestamp
+     * reports_table: session_id, report_content, created_at
+   
+   - Option B: Create separate SQLite DB
+     * File: ./data/clinical_consultation_db/patients.sqlite
+     * Same table structure as Option A
+
+3. AGENT REGISTRATION (1 file modification - see Section C)
+
+   agents/agent_decision.py
+   - Add ClinicalPreConsultationAgent to agent list
+   - Add run_clinical_agent() execution function
+   - Update DECISION_SYSTEM_PROMPT with new agent description
+   - Add agent to agent routing logic
+
+4. CONFIGURATION EXTENSION (1 file modification - see Section C)
+
+   config.py
+   - Add ClinicalConsultationConfig class
+   - Add to Config.__init__()
+
+================================================================================
+[C: EXISTING FILES REQUIRING MINIMAL ADDITIVE CHANGES]
+================================================================================
+
+1. agents/agent_decision.py (ROUTING REGISTRATION)
+
+   Minimal Changes Required:
+
+   A. Update DECISION_SYSTEM_PROMPT (line 42-64)
+      - Add to Available Agents list:
+        "7. CLINICAL_PRE_CONSULTATION_AGENT - For patient pre-consultation intake"
+      - Add to guidelines:
+        "If the user indicates they want to provide medical history or prepare for doctor visit, route to CLINICAL_PRE_CONSULTATION_AGENT"
+
+   B. Add agent execution function (NEW - after run_web_search_agent)
+      ```python
+      def run_clinical_agent(state: AgentState) -> AgentState:
+          """Handle clinical pre-consultation intake."""
+          print(f"Selected agent: CLINICAL_PRE_CONSULTATION_AGENT")
+          
+          agent = ClinicalPreConsultationAgent(config)
+          result = agent.process_patient_info(state["current_input"], state["messages"])
+          
+          return {
+              **state,
+              "output": result,
+              "agent_name": "CLINICAL_PRE_CONSULTATION_AGENT"
+          }
+      ```
+
+   C. Update graph builder (line 450-500 approx)
+      - Add edge: workflow.add_node("run_clinical_agent", run_clinical_agent)
+      - Add conditional routing in route_to_agent() if decision["agent"] == "CLINICAL_PRE_CONSULTATION_AGENT"
+
+   D. Update validation config reference (if needed)
+      - Check if clinical agent requires validation
+
+   Scope: ~20-30 lines added, no deletion, no refactoring
+
+2. config.py (CONFIGURATION)
+
+   Minimal Changes Required:
+
+   A. Add new class (after WebSearchConfig, before RAGConfig):
+      ```python
+      class ClinicalConsultationConfig:
+          def __init__(self):
+              self.llm = ChatGroq(
+                  model="qwen/qwen3.8-27b",
+                  temperature=0.5,  # Conversational but factual
+                  api_key=os.getenv("GROQ_API_KEY")
+              )
+              self.context_limit = 30  # Include more history for context
+              self.max_followup_questions = 5
+              self.emergency_keywords = ["chest pain", "difficulty breathing", "severe bleeding"]
+              self.patient_db_path = "./data/clinical_consultation_db"
+      ```
+
+   B. Extend Config.__init__() (line 131):
+      - Add: self.clinical_consultation = ClinicalConsultationConfig()
+
+   Scope: ~15 lines added, no deletion, no refactoring
+
+3. app.py (OPTIONAL - NOT REQUIRED)
+
+   Current Implementation: Generic /chat endpoint works for all agents
+   
+   Optional Enhancement (not required for MVP):
+   - Add /clinical_intake endpoint for specialized UI flow
+   - Keep existing /chat endpoint unchanged
+   
+   If Added: ~20-30 lines (new endpoint only, no modification to existing code)
+
+================================================================================
+[D: PROPOSED NEW AGENT FOLDER AND FILE STRUCTURE]
+================================================================================
+
+NEW DIRECTORY: agents/clinical_pre_consultation_agent/
+
+agents/clinical_pre_consultation_agent/
+│
+├── __init__.py
+│   └── ClinicalPreConsultationAgent class (main orchestrator)
+│       ├── __init__(config)
+│       ├── process_patient_info(user_input, conversation_history) -> Dict
+│       ├── handle_followup(user_response) -> str
+│       ├── request_rag_context(topic) -> str
+│       ├── request_web_search_context(query) -> str
+│       └── finalize_report() -> str
+│
+├── patient_info_collector.py
+│   └── PatientInfoCollector class
+│       ├── __init__(config)
+│       ├── collect_demographics() -> Dict
+│       │   ├── age, gender, weight, height, blood_type, insurance
+│       │   └── occupational_exposure
+│       ├── collect_chief_complaint() -> Dict
+│       │   ├── reason_for_visit
+│       │   └── duration, urgency
+│       ├── collect_symptoms() -> Dict
+│       │   ├── symptom_list, severity, onset_date
+│       │   ├── duration, progression
+│       │   └── aggravating/relieving factors
+│       ├── collect_medical_history() -> Dict
+│       │   ├── past_conditions, surgeries, hospitalizations
+│       │   ├── chronic_diseases
+│       │   └── family_history
+│       ├── collect_medications() -> Dict
+│       │   ├── current_medications, dosages
+│       │   ├── supplements, OTC drugs
+│       │   └── medication_adherence
+│       ├── collect_allergies() -> Dict
+│       │   ├── drug_allergies, food_allergies
+│       │   ├── environmental_allergies
+│       │   └── severity, reaction_type
+│       ├── collect_lifestyle() -> Dict
+│       │   ├── smoking_status, alcohol_use
+│       │   ├── exercise_habits, diet
+│       │   └── stress_levels
+│       └── collect_vitals() -> Dict (if available)
+│           ├── blood_pressure, heart_rate, temperature
+│           ├── respiratory_rate, oxygen_saturation
+│           └── blood_glucose (if relevant)
+│
+├── followup_question_generator.py
+│   └── FollowupQuestionGenerator class
+│       ├── __init__(config, llm)
+│       ├── generate_adaptive_questions(collected_data, current_topic) -> List[str]
+│       │   ├── Based on collected information gaps
+│       │   ├── Contextually relevant to symptoms
+│       │   └── Progressively detailed (starting broad, narrowing down)
+│       ├── rank_questions_by_importance(questions) -> List[str]
+│       └── generate_single_question(context) -> str
+│
+├── red_flag_detector.py
+│   └── RedFlagDetector class
+│       ├── __init__(config, llm)
+│       ├── detect_emergencies(symptoms, vitals, medical_history) -> List[Dict]
+│       │   └── Returns: [{flag: str, severity: "CRITICAL"|"HIGH", guidance: str}]
+│       ├── assess_severity(flags, vitals) -> str ("CRITICAL", "HIGH", "MODERATE", "LOW")
+│       ├── generate_urgent_care_guidance(flags) -> str
+│       └── should_escalate_to_emergency(flags, vitals) -> bool
+│
+├── context_requester.py
+│   └── ContextRequester class
+│       ├── __init__(config, rag_agent, web_search_agent)
+│       ├── request_rag_context(topic, symptoms) -> str
+│       │   └── Query RAG agent for medical knowledge on topic
+│       ├── request_web_search_context(query) -> str
+│       │   └── Query Web Search agent for recent developments
+│       └── integrate_context_into_report(context) -> str
+│
+├── report_generator.py
+│   └── ReportGenerator class
+│       ├── __init__(config, llm)
+│       ├── compile_patient_data(collected_info) -> Dict
+│       ├── structure_for_doctor(patient_data) -> str
+│       │   └── Format: structured pre-consultation report
+│       ├── include_missing_info_notes(gaps) -> str
+│       ├── include_red_flags(flags) -> str
+│       ├── include_relevant_context(rag_context, web_context) -> str
+│       └── generate_final_report() -> str
+│           └── Output: Structured report for doctor review
+│
+├── patient_session_store.py
+│   └── PatientSessionStore class
+│       ├── __init__(config)
+│       ├── initialize_session(session_id, patient_name) -> bool
+│       ├── save_patient_data(session_id, data_dict) -> bool
+│       ├── load_patient_data(session_id) -> Dict
+│       ├── update_patient_data(session_id, data_dict) -> bool
+│       ├── save_report(session_id, report) -> bool
+│       ├── get_session_status(session_id) -> str ("in_progress", "completed", "paused")
+│       └── retrieve_all_reports(session_id) -> List[str]
+│
+├── state_manager.py (Optional utility)
+│   └── StatefulConversation class
+│       ├── __init__(agent, session_store)
+│       ├── save_checkpoint(state) -> bool
+│       ├── load_checkpoint(session_id) -> AgentState
+│       └── resume_session(session_id) -> str
+│
+└── README.md
+    └── Agent documentation, usage examples, data schema
+
+TOTAL: ~1,500-2,000 lines of new code (spread across 8-10 files)
+
+================================================================================
+[E: DATA FLOW BETWEEN AGENTS AND DOCTOR REPORT]
+================================================================================
+
+1. CONVERSATION FLOW WITH NEW CLINICAL AGENT
+
+   User: "I'd like to prepare for my doctor's appointment"
+       ↓
+   Agent Decision → Routes to CLINICAL_PRE_CONSULTATION_AGENT
+       ↓
+   Clinical Agent Lifecycle:
+   
+   Phase 1: Patient Information Collection
+   ├── Greeting & consent
+   ├── Demographic collection
+   │   └── Follow-up: "What's your name, age, and gender?"
+   ├── Chief complaint identification
+   │   └── Follow-up: "What brought you here today?"
+   └── Response: "I'll help you prepare. Let me ask you some questions..."
+   
+   Phase 2: Symptom & History Collection (Adaptive Questioning)
+   ├── Initial symptom question: "Can you describe your symptoms?"
+   ├── Analyze response → Identify gaps
+   ├── Generate follow-up: "When did this start?", "Has it gotten worse?"
+   ├── Collect: Duration, severity, progression
+   ├── Collect: Medical history, medications, allergies
+   ├── Collect: Lifestyle factors (smoking, alcohol, exercise)
+   └── Dynamic adjustment based on responses
+   
+   Phase 3: Context Enhancement
+   ├── Query RAG Agent: "Provide information about [patient's symptoms]"
+   │   └── Returns: Relevant medical knowledge from ingested documents
+   ├── Query Web Search Agent: "Recent developments in [condition/treatment]"
+   │   └── Returns: Latest medical information
+   └── Integrate context into patient data
+   
+   Phase 4: Red Flag Detection
+   ├── Analyze collected symptoms + vitals
+   ├── Detect CRITICAL flags: "severe chest pain", "difficulty breathing"
+   │   └── Generate: Urgent guidance, suggest emergency care
+   ├── Detect HIGH flags: Symptoms requiring specialist
+   │   └── Generate: Escalation recommendation
+   └── Store flags for doctor notification
+   
+   Phase 5: Report Generation
+   ├── Compile all data:
+   │   ├── Patient demographics
+   │   ├── Chief complaint
+   │   ├── Symptom details
+   │   ├── Medical history
+   │   ├── Current medications
+   │   ├── Allergies
+   │   ├── Vital signs (if available)
+   │   └── Red flags (if any)
+   ├── Format for doctor: Structured pre-consultation report
+   ├── Include context: Medical knowledge from RAG/Web Search
+   ├── Include gaps: "Missing information: recent lab results"
+   └── Save to database
+   
+   User receives: "Your pre-consultation report is ready. [Summary]"
+
+2. DATA EXCHANGE WITH EXISTING AGENTS
+
+   A. With RAG Agent
+      ├── Input: Topic (e.g., "diabetes symptoms")
+      ├── Path: Direct instantiation of MedicalRAG
+      ├── Call: rag_agent.process_query(topic, chat_history)
+      ├── Returns: {"response": str, "sources": List, "confidence": float}
+      └── Usage: Integrate into report as medical context
+   
+   B. With Web Search Agent
+      ├── Input: Query (e.g., "latest hypertension treatment 2026")
+      ├── Path: Direct instantiation of WebSearchProcessorAgent
+      ├── Call: web_search_agent.search(query)
+      ├── Returns: "Web Search Results: [results]"
+      └── Usage: Integrate into report as recent developments
+
+3. DATA STORAGE IN DATABASE
+
+   Schema (SQLite):
+
+   patients_table:
+   ├── session_id (Primary Key): UUID
+   ├── patient_name: TEXT
+   ├── created_at: DATETIME
+   ├── updated_at: DATETIME
+   ├── status: "in_progress" | "completed"
+   └── metadata: JSON
+
+   patient_demographics_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── age: INT, gender: TEXT, weight: FLOAT, height: FLOAT
+   ├── blood_type: TEXT, insurance: TEXT
+   └── occupation: TEXT
+
+   patient_complaints_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── chief_complaint: TEXT
+   ├── duration: TEXT, urgency: TEXT
+   └── date_recorded: DATETIME
+
+   patient_symptoms_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── symptom: TEXT, severity: INT (1-10)
+   ├── onset_date: DATE, duration: TEXT
+   ├── progression: TEXT
+   └── date_recorded: DATETIME
+
+   patient_medical_history_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── condition: TEXT, year_diagnosed: INT
+   ├── status: "resolved" | "ongoing"
+   └── date_recorded: DATETIME
+
+   patient_medications_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── medication_name: TEXT, dosage: TEXT
+   ├── frequency: TEXT, adherence: TEXT
+   └── date_recorded: DATETIME
+
+   patient_allergies_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── allergen: TEXT, type: "drug" | "food" | "environmental"
+   ├── reaction: TEXT, severity: TEXT
+   └── date_recorded: DATETIME
+
+   patient_vitals_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── vital_sign: TEXT (e.g., "blood_pressure")
+   ├── value: TEXT, unit: TEXT, timestamp: DATETIME
+   └── date_recorded: DATETIME
+
+   patient_red_flags_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── flag: TEXT, severity: "CRITICAL" | "HIGH" | "MODERATE"
+   ├── guidance: TEXT, escalation_recommended: BOOL
+   └── date_detected: DATETIME
+
+   patient_reports_table:
+   ├── id (Primary Key)
+   ├── session_id (Foreign Key)
+   ├── report_content: TEXT (structured JSON)
+   ├── rag_context: TEXT, web_search_context: TEXT
+   ├── created_at: DATETIME, finalized_at: DATETIME
+   ├── doctor_reviewed: BOOL, doctor_notes: TEXT
+   └── status: "draft" | "finalized" | "reviewed"
+
+4. DOCTOR REPORT FORMAT
+
+   Pre-Consultation Report Output:
+   
+   ═══════════════════════════════════════════════════════
+   PRE-CONSULTATION PATIENT INTAKE REPORT
+   Session ID: [UUID]
+   Date: [YYYY-MM-DD HH:MM:SS]
+   ═══════════════════════════════════════════════════════
+   
+   PATIENT DEMOGRAPHICS
+   ├─ Name: [If provided]
+   ├─ Age: [years]
+   ├─ Gender: [M/F/Other]
+   ├─ Height: [cm], Weight: [kg], BMI: [Calculated]
+   ├─ Blood Type: [Type]
+   └─ Occupation: [Occupation]
+   
+   CHIEF COMPLAINT
+   ├─ Primary Reason: [Complaint]
+   ├─ Duration: [Time period]
+   └─ Urgency: [Routine/Urgent]
+   
+   PRESENT SYMPTOMS
+   ├─ Symptom 1: [Name]
+   │  ├─ Severity: [1-10]
+   │  ├─ Onset: [Date/Time]
+   │  ├─ Duration: [Time period]
+   │  └─ Progression: [Stable/Worsening/Improving]
+   ├─ Symptom 2: [...]
+   └─ [Additional symptoms]
+   
+   MEDICAL HISTORY
+   ├─ Past Medical Conditions:
+   │  ├─ Condition 1: [Years ago/Status]
+   │  └─ [Additional conditions]
+   ├─ Surgeries: [List]
+   ├─ Hospitalizations: [List]
+   └─ Family History: [Relevant conditions]
+   
+   CURRENT MEDICATIONS
+   ├─ Medication 1: [Name, Dosage, Frequency]
+   ├─ Medication 2: [...]
+   ├─ OTC/Supplements: [List]
+   └─ Adherence: [Good/Fair/Poor]
+   
+   ALLERGIES
+   ├─ Drug Allergies: [List with reactions]
+   ├─ Food Allergies: [List with reactions]
+   ├─ Environmental: [List with reactions]
+   └─ Severity: [Mild/Moderate/Severe]
+   
+   VITAL SIGNS (if available)
+   ├─ Blood Pressure: [mmHg]
+   ├─ Heart Rate: [bpm]
+   ├─ Temperature: [°C]
+   ├─ Respiratory Rate: [breaths/min]
+   ├─ Oxygen Saturation: [%]
+   └─ Blood Glucose: [mg/dL] (if relevant)
+   
+   RED FLAGS & CONCERNS
+   ├─ Critical Flags: [List with severity]
+   ├─ Recommended Actions: [Escalation/Follow-up]
+   └─ Urgent Care Guidance: [If applicable]
+   
+   MEDICAL CONTEXT (from RAG & Web Search)
+   ├─ Relevant Medical Knowledge:
+   │  ├─ Source: [Ingested medical documents]
+   │  └─ Content: [Brief relevant info]
+   ├─ Recent Developments:
+   │  ├─ Source: [Web search results]
+   │  └─ Content: [Latest treatment/research]
+   └─ References: [Links to sources]
+   
+   MISSING INFORMATION
+   ├─ Required for Complete Assessment:
+   │  ├─ Recent lab results (blood work, imaging)
+   │  ├─ Blood pressure readings over time
+   │  └─ [Other gaps]
+   └─ Doctor Notes: [To request from patient]
+   
+   PATIENT NOTES
+   └─ Additional information provided by patient
+   
+   NEXT STEPS
+   ├─ Doctor Review: [Pending]
+   ├─ Follow-up Needed: [Yes/No]
+   └─ Appointment Scheduled: [Date/Time if available]
+   
+   ═══════════════════════════════════════════════════════
+
+5. WORKFLOW SUMMARY
+
+   Clinical Agent Lifecycle:
+   
+   START
+     ↓
+   Collect Patient Info
+     ├── Demographics, chief complaint
+     ├── Symptoms with follow-ups
+     ├── Medical history, medications, allergies
+     └── Lifestyle and vital signs (if available)
+     ↓
+   Query External Agents
+     ├── RAG Agent: Medical knowledge on symptoms
+     ├── Web Search: Recent treatment developments
+     └── Integrate context into patient record
+     ↓
+   Detect Red Flags
+     ├── Analyze for emergencies
+     ├── Assess severity
+     └── Generate guidance if needed
+     ↓
+   Generate Report
+     ├── Compile all data
+     ├── Structure for doctor
+     ├── Save to database
+     └── Display to patient
+     ↓
+   FINISH
+
+================================================================================
+[F: SMALLEST IMPLEMENTATION PLAN - INDEPENDENT TASKS]
+================================================================================
+
+PHASE 1: FOUNDATION (1-2 weeks)
+
+Task 1.1: Setup Agent Structure & Config
+  Deliverable: New folder + __init__.py + config registration
+  Files: agents/clinical_pre_consultation_agent/__init__.py
+         config.py (add ClinicalConsultationConfig)
+  Dependencies: None
+  Testing: Import check, config initialization test
+  Effort: 2-3 hours
+
+Task 1.2: Create Patient Data Collector Module
+  Deliverable: PatientInfoCollector class with data collection methods
+  Files: agents/clinical_pre_consultation_agent/patient_info_collector.py
+  Dependencies: Config, LLM access
+  Testing: Unit tests for each collection method
+  Effort: 4-5 hours
+
+Task 1.3: Create Database Schema & Storage Module
+  Deliverable: PatientSessionStore class + SQLite schema
+  Files: agents/clinical_pre_consultation_agent/patient_session_store.py
+         Database: ./data/clinical_consultation_db/schema.sql
+  Dependencies: None (uses Python sqlite3)
+  Testing: Schema validation, CRUD operation tests
+  Effort: 3-4 hours
+
+PHASE 2: INTELLIGENCE & DETECTION (1-2 weeks)
+
+Task 2.1: Implement Adaptive Follow-up Question Generator
+  Deliverable: FollowupQuestionGenerator class
+  Files: agents/clinical_pre_consultation_agent/followup_question_generator.py
+  Dependencies: Config, LLM (ChatGroq)
+  Testing: Question generation tests with various contexts
+  Effort: 3-4 hours
+
+Task 2.2: Implement Red Flag Detector
+  Deliverable: RedFlagDetector class with emergency detection
+  Files: agents/clinical_pre_consultation_agent/red_flag_detector.py
+  Dependencies: Config, LLM
+  Testing: Red flag detection tests with sample symptoms
+  Effort: 3-4 hours
+
+Task 2.3: Implement Context Requester (Agent Integration)
+  Deliverable: ContextRequester class for RAG & Web Search integration
+  Files: agents/clinical_pre_consultation_agent/context_requester.py
+  Dependencies: MedicalRAG, WebSearchProcessorAgent
+  Testing: Integration tests with existing agents
+  Effort: 3-4 hours
+
+PHASE 3: REPORTING (1 week)
+
+Task 3.1: Implement Report Generator
+  Deliverable: ReportGenerator class with structured output
+  Files: agents/clinical_pre_consultation_agent/report_generator.py
+  Dependencies: Config, LLM
+  Testing: Report generation with sample patient data
+  Effort: 3-4 hours
+
+PHASE 4: ORCHESTRATION & INTEGRATION (1-2 weeks)
+
+Task 4.1: Implement Main Agent Orchestrator
+  Deliverable: ClinicalPreConsultationAgent class (in __init__.py)
+  Files: agents/clinical_pre_consultation_agent/__init__.py (expand)
+  Dependencies: All Phase 1-3 modules
+  Testing: End-to-end workflow tests
+  Effort: 4-5 hours
+
+Task 4.2: Register Agent in Decision System
+  Deliverable: Add agent to LangGraph routing + execution
+  Files: agents/agent_decision.py (add ~30 lines)
+         config.py (add ClinicalConsultationConfig)
+  Dependencies: ClinicalPreConsultationAgent
+  Testing: Agent selection tests, decision routing tests
+  Effort: 2-3 hours
+
+Task 4.3: Integration Testing with Existing Agents
+  Deliverable: Tests for RAG & Web Search integration
+  Files: New test suite
+  Dependencies: All previous tasks
+  Testing: Full workflow tests
+  Effort: 3-4 hours
+
+PHASE 5: FRONTEND & UX (1-2 weeks) - OPTIONAL
+
+Task 5.1: Create Specialized UI Endpoint (Optional)
+  Deliverable: /clinical_intake endpoint (REST API)
+  Files: app.py (add endpoint only, no modifications)
+  Dependencies: ClinicalPreConsultationAgent
+  Testing: Endpoint tests
+  Effort: 2-3 hours
+
+Task 5.2: Create Frontend Template (Optional)
+  Deliverable: Clinical intake form UI
+  Files: templates/clinical_intake.html
+  Testing: UI/UX tests
+  Effort: 4-5 hours
+
+================================================================================
+TOTAL EFFORT ESTIMATE: 30-40 hours (core implementation)
+                      35-50 hours (with optional frontend)
+
+IMPLEMENTATION ORDER:
+1. Task 1.1 → 1.2 → 1.3 (Setup & foundation)
+2. Task 2.1 → 2.2 → 2.3 (Intelligence)
+3. Task 3.1 (Reporting)
+4. Task 4.1 → 4.2 → 4.3 (Integration)
+5. Tasks 5.1, 5.2 (Optional UI)
+
+================================================================================
+[G: RISKS AND COMPATIBILITY CONSIDERATIONS]
+================================================================================
+
+1. ARCHITECTURAL RISKS
+
+Risk: Agent State Explosion
+├─ Problem: Adding new agent increases message history size
+├─ Impact: Memory usage, LangGraph performance
+├─ Mitigation:
+│  ├─ Clinical agent runs independently with separate state (optional)
+│  ├─ Implement message history truncation (already in place)
+│  └─ Monitor state size in production
+
+Risk: Conversation Context Confusion
+├─ Problem: Patient info collection may interfere with RAG/Web Search calls
+├─ Impact: LLM may misinterpret context
+├─ Mitigation:
+│  ├─ Use separate LLM context for agent-to-agent communication
+│  ├─ Explicitly mark internal vs. external queries
+│  └─ Isolate agent communication from user conversation
+
+Risk: Concurrent Agent Calls
+├─ Problem: Clinical agent requests RAG + Web Search simultaneously
+├─ Impact: May exceed API rate limits
+├─ Mitigation:
+│  ├─ Sequential calls (safer, but slower)
+│  ├─ Implement request queuing
+│  └─ Add API rate limit handling
+
+2. COMPATIBILITY RISKS
+
+Risk: Existing RAG Agent Modification
+├─ Problem: Clinical agent must NOT modify MedicalRAG internal state
+├─ Impact: Could affect retrieval quality for main system
+├─ Mitigation: ✓ READ-ONLY access to RAG Agent
+│  ├─ Clinical agent calls: rag_agent.process_query() only
+│  ├─ No modification of: vectorstore, docstore, embeddings
+│  └─ No ingestion or configuration changes
+
+Risk: Existing Web Search Agent Modification
+├─ Problem: Clinical agent must NOT modify WebSearchProcessorAgent
+├─ Impact: Could affect search results for main system
+├─ Mitigation: ✓ READ-ONLY access to Web Search Agent
+│  ├─ Clinical agent calls: web_search_agent.search() only
+│  ├─ No modification of: search parameters, providers, caching
+│  └─ No configuration changes
+
+Risk: Existing Conversation Agent Interference
+├─ Problem: User may ask clinical questions to Conversation Agent
+├─ Impact: Clinical agent never called if user doesn't explicitly request
+├─ Mitigation:
+│  ├─ Update Decision System prompt to offer clinical intake
+│  ├─ Add keywords for clinical agent routing
+│  └─ No change to Conversation Agent code
+
+Risk: Existing Vision Agents Not Affected
+├─ Status: ✓ No compatibility issues
+├─ Reason: Clinical agent and vision agents are independent
+├─ Note: Can be enhanced later for integrated vision+intake workflow
+
+3. DATA INTEGRITY RISKS
+
+Risk: Patient Data Privacy & Security
+├─ Problem: Storing patient data locally
+├─ Impact: Privacy violation if not properly secured
+├─ Mitigation:
+│  ├─ Use encrypted SQLite (implement later)
+│  ├─ Session-based isolation
+│  ├─ No persistent identification unless explicitly provided
+│  └─ HIPAA compliance guidance (if needed)
+
+Risk: Database Integrity During Concurrent Writes
+├─ Problem: Multiple sessions writing simultaneously
+├─ Impact: Data corruption, race conditions
+├─ Mitigation:
+│  ├─ SQLite has built-in locking (safe for single process)
+│  ├─ Add transaction support in PatientSessionStore
+│  ├─ Implement session-level atomicity
+│  └─ Test with concurrent access patterns
+
+Risk: Report Inconsistency
+├─ Problem: Patient data may be incomplete when report generated
+├─ Impact: Doctor misses critical information
+├─ Mitigation:
+│  ├─ Add "Missing Information" section to report (prevents misinterpretation)
+│  ├─ Implement report versioning (track updates)
+│  ├─ Allow report finalization (prevents mid-generation access)
+│  └─ Doctor confirmation workflow
+
+4. LLM-SPECIFIC RISKS
+
+Risk: Groq API Rate Limiting with Multiple Agents
+├─ Problem: Clinical agent + RAG + Web Search all use same Groq API
+├─ Impact: Could trigger 429 errors
+├─ Mitigation:
+│  ├─ Sequential requests (current approach)
+│  ├─ Implement exponential backoff
+│  ├─ Add API error handling with user feedback
+│  └─ Monitor Groq usage across all agents
+
+Risk: LLM Hallucinations in Red Flag Detection
+├─ Problem: LLM may false-positive or false-negative on emergencies
+├─ Impact: Missed critical conditions or unnecessary escalation
+├─ Mitigation:
+│  ├─ Use keyword-based detection (rule-based, not just LLM)
+│  ├─ Low temperature (0.5) for consistency
+│  ├─ Multiple validation layers
+│  └─ Always recommend: "Consult healthcare professional"
+
+Risk: Context Length Limits
+├─ Problem: Patient history + medical context may exceed LLM token limit
+├─ Impact: Truncated context, incomplete analysis
+├─ Mitigation:
+│  ├─ Set context_limit in config (currently 30 messages)
+│  ├─ Implement summarization for long histories (future)
+│  ├─ Prioritize recent data over old
+│  └─ Monitor token usage
+
+5. DATABASE RISKS
+
+Risk: SQLite Scalability
+├─ Problem: SQLite may slow down with thousands of patient records
+├─ Impact: Performance degradation (unlikely for MVP)
+├─ Mitigation:
+│  ├─ SQLite sufficient for development & testing
+│  ├─ Upgrade to PostgreSQL when scaling (future)
+│  ├─ Add indexes on frequently queried columns
+│  └─ Regular backups
+
+Risk: Schema Evolution
+├─ Problem: Adding new patient data fields requires schema migration
+├─ Impact: Database incompatibility
+├─ Mitigation:
+│  ├─ Version schema (add version column to schema)
+│  ├─ Use migrations framework (alembic or similar, future)
+│  ├─ Backward compatibility in code
+│  └─ Flexible JSON field for extensibility
+
+6. INTEGRATION RISKS
+
+Risk: Agent Decision System Overload
+├─ Problem: Adding new agent increases decision complexity
+├─ Impact: Slower routing decisions
+├─ Mitigation:
+│  ├─ Decision model already handles multiple agents
+│  ├─ Clinical agent routing is straightforward (keyword-based)
+│  ├─ No performance degradation expected
+│  └─ Monitor decision latency in production
+
+Risk: Guardrails Bypass
+├─ Problem: Clinical agent may receive blocked inputs
+├─ Impact: Sensitive data could be processed
+├─ Mitigation: ✓ Existing guardrails apply to clinical agent
+│  ├─ Input checked before agent routing
+│  ├─ No bypass possible in current architecture
+│  └─ Clinical agent operates on validated data
+
+7. OPERATIONAL RISKS
+
+Risk: Missing Dependencies in Patient Session Store
+├─ Problem: Database or config not available at runtime
+├─ Impact: Agent crashes
+├─ Mitigation:
+│  ├─ Explicit error handling in __init__()
+│  ├─ Initialization tests
+│  ├─ Clear error messages
+│  └─ Fallback to in-memory storage (if needed)
+
+Risk: Report Not Generated for Edge Cases
+├─ Problem: Incomplete patient data, LLM failure, etc.
+├─ Impact: No report available
+├─ Mitigation:
+│  ├─ Implement partial report generation (with warnings)
+│  ├─ Error recovery with user notification
+│  ├─ Save draft report even if generation interrupted
+│  └─ Retry mechanism with exponential backoff
+
+8. COMPATIBILITY MATRIX
+
+Existing Component          Clinical Agent Interaction  Risk Level  Mitigation
+─────────────────────────────────────────────────────────────────────────────
+RAG Agent                   READ-ONLY queries          LOW         No write access
+Web Search Agent            READ-ONLY queries          LOW         No write access
+Conversation Agent          Independent routing        LOW         No code changes
+Image Analysis Agents       Independent (future)       LOW         No dependencies
+Guardrails                  Applied upstream           LOW         Automatic filtering
+LangGraph State Machine     Extended nodes             LOW         Compatible architecture
+LocalFileStore              Extended tables            MEDIUM      Proper schema isolation
+Qdrant Vector Store         No direct access           LOW         Not used by clinical agent
+Config System               Extended class             LOW         Additive only
+API Endpoints               New endpoint (optional)    MEDIUM      No modifications to existing
+
+OVERALL RISK ASSESSMENT: ✓ LOW-MEDIUM RISK
+- Existing agents unmodified ✓
+- Read-only external access ✓
+- Isolated data storage ✓
+- Compatible architecture ✓
+- Clear migration path ✓
+
+================================================================================

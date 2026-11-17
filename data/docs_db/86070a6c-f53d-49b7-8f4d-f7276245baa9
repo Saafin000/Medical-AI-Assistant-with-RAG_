@@ -1,0 +1,21 @@
+Table 2. Confusion matrix.
+
+picture_counter_2 no image summary
+
+|                | Actual value   | Actual value   | Actual value   |
+|----------------|----------------|----------------|----------------|
+|                | Positive       | Negative       | Total          |
+| Estimate value | Estimate value | Estimate value | Estimate value |
+| Positive       | T p            | F p            | TPos           |
+| Negative       | F N            | T N            | TNeg           |
+| Total          | Pos            | Neg            | M              |
+
+<!-- page_break -->
+
+The resulting feature map is transformed into a flat vector with a flattening layer. A hidden (dense) layer of 128 neurons is then added. This layer deepens the learned features and increases generalization. Finally, the output layer has 4 neurons and calculates the probabilities between classes with the softmax activation function. To train our model, we need to determine the optimal function and metrics. In this paper, we use the Rectified Adam optimization algorithm. This algorithm dynamically adjusts the learning rate and helps to use gradients more efficiently. Also, categorical cross-entropy is used as the loss function during training, as it is widely used in multiclass classification task.
+
+The metrics tracked during training are accuracy, as well as precision and recall. These metrics are important for evaluating the classification performance of the model. In addition, a reduced learning rate recall (ReduceLROnPlateau) is used to dynamically adjust the learning rate. This recall reduces the learning rate when the loss function flattens out during the training process, resulting in more stable training. The epoch is set to 14 and the batch size to 10.
+
+## CNN-based transfer learning
+
+In transfer learning architectures, all parameters and layers outside the model are the same, but after the last 3 layers of transfer learning models are removed, layers unique to the dataset are added instead: the GlobalAveragePooling2D layer contains fewer parameters than the Flatten layer, which reduces the risk of overfitting and helps build a more efficient model. Also, while the Flatten layer is used to organize the data, the GlobalAveragePooling2D layer is used for feature extraction, making the network learning process more efficient.

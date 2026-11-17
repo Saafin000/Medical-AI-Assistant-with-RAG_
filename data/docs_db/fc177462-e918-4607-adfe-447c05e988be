@@ -1,0 +1,21 @@
+picture_counter_5 no image summary
+
+for patients. As seen in this study, AI-based studies will increase their importance to human health, from early diagnosis to positive progress in the treatment process.
+
+Based on the results of this study, transfer learning methods should be preferred especially in image processing-based applications to support health decision makers. The data obtained from MRI or CT can be used as an early warning system to help health decision makers make quick and accurate decisions. Therefore, in addition to empirical analysis, AI-based applications should take a more active role as soon as possible. To this end, the diagnosis of diseases from instant CT or MR images will be investigated in the coming years.
+
+## Limitation
+
+With our motivation to investigate how it will work in single CNN and multilayer CNN based transfer learning models, we subjected the dataset to classification as it is without rotation and cropping operations, which is the most important limitation of our study.
+
+Vol.:(0123456789)
+
+<!-- page_break -->
+
+Vol:.(1234567890)
+
+Figure 5. The confusion metrics of ( a ) CNN model, ( b ) EfficientNetB4 model, ( c ) VGG19 model ( d ) InceptionV3 model, ( e ) VGG16.
+
+picture_counter_6 no image summary
+
+Table 4. Comparison with previous studies on brain tumor. Best results obtained in the study.

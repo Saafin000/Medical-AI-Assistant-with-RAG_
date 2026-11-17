@@ -2,7 +2,7 @@ import requests
 from typing import Dict
 
 from .pubmed_search import PubmedSearchAgent
-from .tavily_search import TavilySearchAgent
+from .duckduckgo_search import DuckDuckGoSearchAgent
 
 class WebSearchAgent:
     """
@@ -10,7 +10,7 @@ class WebSearchAgent:
     """
     
     def __init__(self, config):
-        self.tavily_search_agent = TavilySearchAgent()
+        self.duckduckgo_search_agent = DuckDuckGoSearchAgent()
         
         # self.pubmed_search_agent = PubmedSearchAgent()
         # self.pubmed_api_url = config.pubmed_api_url
@@ -21,8 +21,8 @@ class WebSearchAgent:
         """
         # print(f"[WebSearchAgent] Searching for: {query}")
         
-        tavily_results = self.tavily_search_agent.search_tavily(query=query)
+        web_results = self.duckduckgo_search_agent.search_duckduckgo(query=query)
         # pubmed_results = self.pubmed_search_agent.search_pubmed(self.pubmed_api_url, query)
         
-        return f"Tavily Results:\n{tavily_results}\n"
+        return f"Web Search Results:\n{web_results}\n"
         # \nPubMed Results:\n{pubmed_results}"

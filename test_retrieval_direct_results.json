@@ -1,0 +1,53 @@
+{
+  "Query_1": {
+    "query": "What are the common types of brain tumors?",
+    "stages": {
+      "dense_retrieval": {
+        "status": "FAILED",
+        "error": "No module named 'langchain.storage'",
+        "count": 0,
+        "documents": []
+      },
+      "reranking": {
+        "status": "SKIPPED",
+        "reason": "No documents"
+      }
+    },
+    "final_count": 0,
+    "top_sources": []
+  },
+  "Query_2": {
+    "query": "What is diabetes mellitus?",
+    "stages": {
+      "dense_retrieval": {
+        "status": "FAILED",
+        "error": "No module named 'langchain.storage'",
+        "count": 0,
+        "documents": []
+      },
+      "reranking": {
+        "status": "SKIPPED",
+        "reason": "No documents"
+      }
+    },
+    "final_count": 0,
+    "top_sources": []
+  },
+  "Query_3": {
+    "query": "What information does the document provide about brain tumor diagnosis?",
+    "stages": {
+      "dense_retrieval": {
+        "status": "FAILED",
+        "error": "No module named 'langchain.storage'",
+        "count": 0,
+        "documents": []
+      },
+      "reranking": {
+        "status": "SKIPPED",
+        "reason": "No documents"
+      }
+    },
+    "final_count": 0,
+    "top_sources": []
+  }
+}

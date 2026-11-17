@@ -1,0 +1,11 @@
+OPEN
+
+picture_counter_0 no image summary
+
+## Brain tumor detection from images and comparison with transfer learning methods and ͹-layer CNN
+
+Mohammad Zafer Khaliki  ͷ  &amp; Muhammet Sinan Başarslan  ͸ *
+
+Health is very important for human life. In particular, the health of the brain, which is the executive of the vital resource, is very important. Diagnosis for human health is provided by magnetic resonance imaging ȋMRIȌ devices, which help health decision makers in critical organs such as brain health. Images from these devices are a source of big data for artificial intelligence. This big data enables high performance in image processing classification problems, which is a subfield of artificial intelligence. In this study, we aim to classify brain tumors such as glioma, meningioma, and pituitary tumor from brain MR images. Convolutional Neural Network ȋCNNȌ and CNN-based inception-V͹, EfficientNetBͺ, VGGͷͿ, transfer learning methods were used for classification. F-score, recall, imprinting and accuracy were used to evaluate these models. The best accuracy result was obtained with VGGͷͼ with Ϳ;%, while the F-score value of the same transfer learning model was Ϳͽ%, the Area Under the Curve ȋAUCȌ value was ͿͿ%, the recall value was Ϳ;%, and the precision value was Ϳ;%. CNN architecture and CNN-based transfer learning models are very important for human health in early diagnosis and rapid treatment of such diseases.
+
+The healthcare industry has been rapidly transformed by technological advances in recent years, and an important component of this transformation is artificial intelligence (AI) technology. AI is a computer system that simulates human-like intelligence and has many applications in medicine. One such area is the fight against brain tumors. Brain tumors are a major public health problem in the healthcare sector, and accurate diagnosis, treatment, and follow-up processes are critical. AI has become an important tool for improving these processes and has great potential for early diagnosis and treatment of brain tumors.

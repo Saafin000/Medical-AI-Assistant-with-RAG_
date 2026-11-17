@@ -1,0 +1,3 @@
+| Paul et al. 15          | Their own Brain Tumor dataset    | CNN                                        | 91.43                               |
+| Afshar et al. 16        | Brain Tumor Dataset 28           | CapsNet                                    | 90.89                               |
+| This study              | Brain Tumor Dataset 17           | EfficientNetB4 InceptionV3 VGG19 VGG16 CNN | 97 95 96 98 91                      |

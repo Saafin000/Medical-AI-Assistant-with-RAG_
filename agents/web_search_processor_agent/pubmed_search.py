@@ -25,7 +25,7 @@ class PubmedSearchAgent:
         try:
             response = requests.get(pubmed_api_url, params=params)
             data = response.json()
-            article_ids = data.get("esearchresult", {}).get("idlist", [])
+            article_ids = data.get("researchresult", {}).get("idlist", [])
             if not article_ids:
                 return "No relevant PubMed articles found."
             
