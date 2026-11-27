@@ -156,6 +156,62 @@ class ResponseGenerator:
                 "confidence": 0.0
             }
 
+    def generate_response_stream(
+        self,
+        query: str,
+        retrieved_docs: List[Dict[str, Any]],
+        chat_history: Optional[str] = None,
+        picture_paths: Optional[List[str]] = None
+    ):
+        """
+        Stream response tokens from LLM followed by citation sources and reference images.
+        Yields (chunk_type, chunk_data):
+          - ("token", token_text)
+          - ("complete", {"response": full_text, "sources": sources, "confidence": confidence})
+        """
+        try:
+            picture_paths = picture_paths or []
+            doc_texts = [doc["content"] for doc in retrieved_docs]
+            context = "\n\n===DOCUMENT SECTION===\n\n".join(doc_texts)
+            prompt = self._build_prompt(query, context, chat_history)
+
+            sources = self._extract_sources(retrieved_docs) if hasattr(self, 'include_sources') and self.include_sources else []
+            confidence = self._calculate_confidence(retrieved_docs)
+
+            full_text = ""
+            for chunk in self.response_generator_model.stream(prompt):
+                chunk_str = chunk.content if hasattr(chunk, 'content') else str(chunk)
+                if chunk_str:
+                    full_text += chunk_str
+                    yield ("token", chunk_str)
+
+            # Append sources to stream if included
+            citations_text = ""
+            if hasattr(self, 'include_sources') and self.include_sources and sources:
+                citations_text += "\n\n##### Source documents:"
+                for current_source in sources:
+                    source_path = current_source['path']
+                    source_title = current_source['title']
+                    citations_text += f"\n- [{source_title}]({source_path})"
+
+            if picture_paths:
+                citations_text += "\n\n##### Reference images:"
+                for picture_path in picture_paths:
+                    citations_text += f"\n- [{picture_path.split('/')[-1]}]({picture_path})"
+
+            if citations_text:
+                full_text += citations_text
+                yield ("token", citations_text)
+
+            yield ("complete", {
+                "response": full_text,
+                "sources": sources,
+                "confidence": confidence
+            })
+        except Exception as e:
+            self.logger.error(f"Error in streaming response generation: {e}")
+            raise
+
     def _extract_sources(self, documents: List[Dict[str, Any]]) -> List[Dict[str, str]]:
         """
         Extract source information from retrieved documents for citation.

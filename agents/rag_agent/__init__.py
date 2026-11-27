@@ -236,3 +236,48 @@ class MedicalRAG:
                 "confidence": 0.0,
                 "processing_time": time.time() - start_time
             }
+
+    def process_query_stream(self, query: str, chat_history: Optional[str] = None):
+        """
+        Process a query with the RAG system and stream response tokens.
+        Yields (event_type, event_data):
+          - ("token", token_str)
+          - ("complete", {"response": full_text, "sources": sources, "confidence": confidence})
+        """
+        start_time = time.time()
+        self.logger.info(f"RAG Agent streaming query: {query}")
+        try:
+            # Step 1: Expand query
+            expansion_result = self.query_expander.expand_query(query)
+            expanded_query = expansion_result.get("expanded_query", query)
+            search_query = expanded_query or query
+
+            # Step 2: Retrieval
+            vectorstore, docstore = self.vector_store.load_vectorstore()
+            retrieved_documents = self.vector_store.retrieve_relevant_chunks(
+                query=search_query,
+                vectorstore=vectorstore,
+                docstore=docstore,
+            )
+
+            # Step 3: Rerank
+            if self.reranker and len(retrieved_documents) > 1:
+                reranked_documents, reranked_top_k_picture_paths = self.reranker.rerank(
+                    search_query, retrieved_documents, self.parsed_content_dir
+                )
+            else:
+                reranked_documents = retrieved_documents
+                reranked_top_k_picture_paths = []
+
+            # Step 4: Stream response
+            for item in self.response_generator.generate_response_stream(
+                query=query,
+                retrieved_docs=reranked_documents,
+                picture_paths=reranked_top_k_picture_paths,
+                chat_history=chat_history
+            ):
+                yield item
+
+        except Exception as e:
+            self.logger.error(f"Error streaming RAG query: {e}")
+            raise

@@ -181,3 +181,18 @@ cython_debug/
 
 # ignore below since it gets updated on every local run
 uploads/skin_lesion_output/segmentation_plot.png
+# Local database files
+/data/sessions.db
+*.db
+*.sqlite
+*.sqlite3
+
+# User uploads and generated files
+/uploads/backend/
+/uploads/skin_lesion_output/*
+
+# Frontend build and dependencies
+/frontend/node_modules/
+/frontend/dist/
+
+/scratch/

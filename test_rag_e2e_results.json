@@ -1,7 +1,0 @@
-{
-  "embedding_model": true,
-  "collection_accessible": true,
-  "retrieval_results": {
-    "error": "No module named 'docling'"
-  }
-}

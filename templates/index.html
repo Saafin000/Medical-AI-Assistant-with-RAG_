@@ -211,6 +211,323 @@
         .message tr:hover {
             background-color: #f0f0f0;
         }
+
+        /* Clinical Report Styling */
+        .clinical-report {
+            background-color: #fafbfc;
+            border-left: 5px solid #0d6efd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .report-header {
+            text-align: center;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #1a3a52;
+            margin-bottom: 5px;
+        }
+
+        .report-meta {
+            font-size: 0.85em;
+            color: #666;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .report-meta-item {
+            text-align: center;
+        }
+
+        .report-meta-label {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .report-section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+        }
+
+        .report-section-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #0d6efd;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .report-section-title::before {
+            content: "▸ ";
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .report-field {
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .report-label {
+            font-weight: 600;
+            color: #333;
+            min-width: 140px;
+            flex-basis: 30%;
+        }
+
+        .report-value {
+            color: #555;
+            flex-basis: 70%;
+            word-break: break-word;
+        }
+
+        .report-value.not-provided {
+            color: #999;
+            font-style: italic;
+        }
+
+        .report-value.none-reported {
+            color: #666;
+        }
+
+        .report-value.emergency {
+            color: #dc3545;
+            font-weight: bold;
+            background-color: #ffe0e0;
+            padding: 5px 8px;
+            border-radius: 4px;
+        }
+
+        .emergency-alert {
+            background-color: #fff3cd;
+            border-left: 4px solid #ff6b6b;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            color: #8b0000;
+            font-weight: bold;
+        }
+
+        .clinical-summary {
+            background-color: #e7f3ff;
+            border-left: 4px solid #0d6efd;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 15px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .report-disclaimer {
+            font-size: 0.8em;
+            color: #666;
+            font-style: italic;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            margin-top: 20px;
+        }
+
+        .info-status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .info-status-complete {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .info-status-partial {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .info-status-minimal {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Print styles */
+        @media print {
+            .clinical-report {
+                border: 1px solid #999;
+                page-break-after: always;
+            }
+            
+            .report-header {
+                page-break-after: avoid;
+            }
+
+            .report-section {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .clinical-report {
+                padding: 15px;
+                font-size: 0.95em;
+            }
+
+            .report-field {
+                flex-direction: column;
+            }
+
+            .report-label {
+                flex-basis: 100%;
+                margin-bottom: 5px;
+            }
+
+            .report-value {
+                flex-basis: 100%;
+                margin-left: 10px;
+            }
+
+            .report-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        /* Patient Confirmation Section */
+        .patient-confirmation-section {
+            padding: 20px;
+            margin-top: 20px;
+            background-color: #f0f7ff;
+            border-radius: 8px;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .patient-confirmation-section h5 {
+            color: #0d6efd;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .patient-confirmation-section p {
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-clinical-confirm {
+            background-color: #28a745;
+            border-color: #28a745;
+            font-weight: 600;
+        }
+
+        .btn-clinical-confirm:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+        }
+
+        .btn-clinical-feedback {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            font-weight: 600;
+        }
+
+        .btn-clinical-feedback:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        .clinical-feedback-form {
+            border: 1px solid #dee2e6;
+        }
+
+        .clinical-feedback-form label {
+            color: #333;
+        }
+
+        #patient-feedback-text {
+            border: 1px solid #ced4da;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #patient-feedback-text:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn-submit-feedback {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-submit-feedback:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+        }
+
+        .btn-cancel-feedback {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel-feedback:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        .confirmation-success-message {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        .confirmation-error-message {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        .patient-confirmed-badge {
+            display: inline-block;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -224,11 +541,12 @@
                         Medical Assistant
                     </h5>
                     <div class="agent-info">
-                        <h6>Available Agents</h6>
+                        <h6>Conversational Agents</h6>
                         <ul class="list-unstyled">
                             <li><i class="fas fa-comment-medical me-2"></i> Medical Conversation Agent</li>
                             <li><i class="fas fa-database me-2"></i> Medical RAG Agent</li>
                             <li><i class="fas fa-search me-2"></i> Web Search Agent</li>
+                            <li><i class="fas fa-clipboard-check me-2"></i> Clinical Pre-Consultation Agent</li>
                         </ul>
                     </div>
                     <div class="agent-info">
@@ -242,20 +560,44 @@
                     <div class="agent-info">
                         <h6>Agent Capabilities</h6>
                         <ul class="list-unstyled">
+                            <li><strong>Medical Conversation Agent:</strong>
+                                <ul>
+                                    <li>General health information and conversational assistance</li>
+                                    <li>Answers common medical questions with context-aware responses</li>
+                                </ul>
+                            </li>
                             <li><strong>Medical RAG Agent:</strong>
                                 <ul>
-                                    <li>Docling based parsing to extract text, tables, and images from PDFs</li>
-                                    <li>Embedding markdown formatted text, tables and LLM based image summaries</li>
-                                    <li>LLM based semantic chunking with structural boundaries</li>
-                                    <li>LLM based query expansion with related medical terms</li>
-                                    <li>Qdrant Vector DB hybrid search</li>
+                                    <li>Docling-based document parsing to extract text, tables, and images from PDFs</li>
+                                    <li>LLM-based semantic chunking with structural boundaries</li>
+                                    <li>LLM-based query expansion with related medical terms</li>
+                                    <li>Qdrant hybrid vector database retrieval</li>
                                     <li>Input-output guardrails for safe responses</li>
                                     <li>Confidence-based handoff to Web Search to prevent hallucinations</li>
                                 </ul>
                             </li>
-                            <li><strong>Human-in-the-loop Verification:</strong>
+                            <li><strong>Web Search Agent:</strong>
                                 <ul>
-                                    <li>Human verification for CV agents</li>
+                                    <li>External medical information retrieval from reliable sources</li>
+                                    <li>Supplements medical knowledge when confidence is low</li>
+                                    <li>Provides current medical research and updates</li>
+                                </ul>
+                            </li>
+                            <li><strong>Clinical Pre-Consultation Agent:</strong>
+                                <ul>
+                                    <li>Structured patient information collection</li>
+                                    <li>Adaptive follow-up questions based on patient responses</li>
+                                    <li>Red-flag detection for emergency escalation</li>
+                                    <li>Structured clinical pre-consultation report generation</li>
+                                    <li>Patient review, correction, and confirmation workflow</li>
+                                </ul>
+                            </li>
+                            <li><strong>Computer Vision Agents (Human-in-the-loop):</strong>
+                                <ul>
+                                    <li>Brain Tumor Detection from medical imaging</li>
+                                    <li>Chest X-ray COVID-19 Classification</li>
+                                    <li>Skin Lesion Segmentation and analysis</li>
+                                    <li>Human verification required for all CV results</li>
                                 </ul>
                             </li>
                         </ul>
@@ -288,7 +630,13 @@
                     <div id="chat-body" class="chat-body">
                         <div class="message assistant-message">
                             <div class="agent-tag">System</div>
-                            <p>Hello! I'm your medical assistant. You can ask me health-related questions or upload medical images for analysis.</p>
+                            <p>Hello! I'm your medical assistant. You can:</p>
+                            <ul>
+                                <li>Ask general health-related questions</li>
+                                <li>Upload medical images for analysis</li>
+                                <li>Request a clinical pre-consultation report</li>
+                            </ul>
+                            <p><small class="text-muted">I'll intelligently route your request to the most appropriate agent.</small></p>
                         </div>
                     </div>
                     
@@ -968,6 +1316,241 @@
             const removeImageBtn = document.getElementById('remove-image');
             const clearChatBtn = document.getElementById('clear-chat');
 
+            // Clinical Report Renderer Function
+            function renderClinicalReport(reportText, agentName) {
+                // Detect if this is a clinical report from the agent name
+                if (!agentName || !agentName.includes('CLINICAL')) {
+                    return null; // Not a clinical report
+                }
+
+                // Try to parse structured report sections from the text
+                const sections = {};
+                let currentSection = null;
+                let currentContent = [];
+
+                const lines = reportText.split('\n');
+                const sectionMarkers = [
+                    'Chief Complaint', 'Symptoms', 'Vital Signs', 'Medical History',
+                    'Medications', 'Allergies', 'Lifestyle', 'Demographics', 'Red Flags',
+                    'Emergency', 'Clinical Summary', 'Status', 'Information Completeness'
+                ];
+
+                lines.forEach(line => {
+                    const trimmedLine = line.trim();
+                    
+                    // Check if this line starts a new section
+                    let isNewSection = false;
+                    for (let marker of sectionMarkers) {
+                        if (trimmedLine.toLowerCase().includes(marker.toLowerCase()) && (trimmedLine.includes(':**') || trimmedLine.includes('**') || trimmedLine.length < 60)) {
+                            if (currentSection && currentContent.length > 0) {
+                                sections[currentSection] = currentContent.join('\n').trim();
+                            }
+                            currentSection = marker;
+                            currentContent = [];
+                            isNewSection = true;
+                            break;
+                        }
+                    }
+
+                    if (!isNewSection && currentSection && trimmedLine) {
+                        currentContent.push(line);
+                    }
+                });
+
+                if (currentSection && currentContent.length > 0) {
+                    sections[currentSection] = currentContent.join('\n').trim();
+                }
+
+                // If we found structured sections, render as professional report
+                if (Object.keys(sections).length > 3) {
+                    return formatStructuredReport(sections, reportText);
+                }
+
+                return null; // Couldn't parse as structured report
+            }
+
+            function formatStructuredReport(sections, fullText) {
+                let html = '<div class="clinical-report">';
+
+                // Header
+                html += '<div class="report-header">';
+                html += '<div class="report-title">📋 Clinical Pre-Consultation Report</div>';
+                html += '<div class="report-meta">';
+                html += `<div class="report-meta-item"><span class="report-meta-label">Generated:</span> ${new Date().toLocaleDateString()}</div>`;
+                html += '<div class="report-meta-item"><span class="report-meta-label">Status:</span> Pre-Consultation</div>';
+                html += '</div></div>';
+
+                // Emergency Alert if present
+                if (fullText.toLowerCase().includes('emergency') || fullText.toLowerCase().includes('escalation')) {
+                    html += '<div class="emergency-alert">⚠️ EMERGENCY: Patient requires immediate medical attention</div>';
+                }
+
+                // Chief Complaint
+                if (sections['Chief Complaint']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">Chief Complaint</div>';
+                    html += formatSectionContent(sections['Chief Complaint']);
+                    html += '</div>';
+                }
+
+                // Symptoms
+                if (sections['Symptoms']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">Symptoms</div>';
+                    html += formatSectionContent(sections['Symptoms']);
+                    html += '</div>';
+                }
+
+                // Vital Signs
+                if (sections['Vital Signs']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">Vital Signs</div>';
+                    html += formatSectionContent(sections['Vital Signs']);
+                    html += '</div>';
+                }
+
+                // Medical History
+                if (sections['Medical History']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">Medical History</div>';
+                    html += formatSectionContent(sections['Medical History']);
+                    html += '</div>';
+                }
+
+                // Medications
+                if (sections['Medications']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">Medications</div>';
+                    html += formatSectionContent(sections['Medications']);
+                    html += '</div>';
+                }
+
+                // Allergies
+                if (sections['Allergies']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">Allergies</div>';
+                    html += formatSectionContent(sections['Allergies']);
+                    html += '</div>';
+                }
+
+                // Lifestyle
+                if (sections['Lifestyle']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">Lifestyle</div>';
+                    html += formatSectionContent(sections['Lifestyle']);
+                    html += '</div>';
+                }
+
+                // Demographics
+                if (sections['Demographics']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">Demographics</div>';
+                    html += formatSectionContent(sections['Demographics']);
+                    html += '</div>';
+                }
+
+                // Red Flags / Emergency
+                if (sections['Red Flags'] || sections['Emergency']) {
+                    html += '<div class="report-section">';
+                    html += '<div class="report-section-title">🚨 Emergency Assessment</div>';
+                    html += formatSectionContent(sections['Red Flags'] || sections['Emergency']);
+                    html += '</div>';
+                }
+
+                // Clinical Summary
+                if (sections['Clinical Summary']) {
+                    html += '<div class="clinical-summary">';
+                    html += '<strong>Clinical Summary for Provider:</strong><br>';
+                    html += escapeHtml(sections['Clinical Summary']);
+                    html += '</div>';
+                }
+
+                // Disclaimer
+                html += '<div class="report-disclaimer">';
+                html += '📌 <strong>Disclaimer:</strong> This is a pre-consultation intake report generated from patient-reported information. It is not a medical diagnosis. A licensed healthcare provider must review and confirm all information. In case of emergency, call 911 or seek immediate medical attention.';
+                html += '</div>';
+
+                // Patient Confirmation Section
+                html += '<div class="patient-confirmation-section">';
+                html += '<hr style="margin-top: 30px;">';
+                html += '<h5>Review and Confirm Your Information</h5>';
+                html += '<p>Please review all information above. Is everything accurate and complete?</p>';
+                
+                html += '<div class="confirmation-buttons mt-3">';
+                html += '<button class="btn btn-success btn-clinical-confirm" data-session-id="' + (window.currentSessionId || '') + '">';
+                html += '✓ Yes, This is Correct';
+                html += '</button>';
+                html += '<button class="btn btn-primary btn-clinical-feedback" style="margin-left: 10px;">';
+                html += '+ Add/Correct Information';
+                html += '</button>';
+                html += '</div>';
+                
+                // Feedback form (hidden by default)
+                html += '<div class="clinical-feedback-form" style="display: none; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">';
+                html += '<label for="patient-feedback-text"><strong>Please provide your corrections or additional information:</strong></label>';
+                html += '<textarea id="patient-feedback-text" class="form-control mt-2" rows="5" placeholder="Example: I also have a headache that started yesterday. My blood pressure has been high recently..." style="margin-bottom: 10px;"></textarea>';
+                html += '<button class="btn btn-primary btn-submit-feedback">Submit Corrections</button>';
+                html += '<button class="btn btn-secondary btn-cancel-feedback" style="margin-left: 8px;">Cancel</button>';
+                html += '</div>';
+                
+                html += '</div>'; // Close patient-confirmation-section
+                html += '</div>'; // Close clinical-report
+
+                return html;
+            }
+
+            function formatSectionContent(content) {
+                let html = '';
+                const lines = content.split('\n').filter(l => l.trim());
+                
+                lines.forEach(line => {
+                    line = line.trim();
+                    if (!line) return;
+
+                    // Try to parse key-value pairs
+                    if (line.includes(':') && !line.includes('http')) {
+                        const [key, ...valueParts] = line.split(':');
+                        const value = valueParts.join(':').trim();
+                        
+                        // Apply special styling for missing/none values
+                        let valueClass = '';
+                        if (value.toLowerCase() === 'not provided' || value.toLowerCase() === 'unknown') {
+                            valueClass = 'not-provided';
+                        } else if (value.toLowerCase() === 'none reported' || value === 'None') {
+                            valueClass = 'none-reported';
+                        }
+                        
+                        html += `<div class="report-field">`;
+                        html += `<span class="report-label">${escapeHtml(key.trim())}:</span>`;
+                        html += `<span class="report-value ${valueClass}">${escapeHtml(value)}</span>`;
+                        html += `</div>`;
+                    } else {
+                        // Plain line without colon
+                        html += `<div class="report-field"><span class="report-value">${escapeHtml(line)}</span></div>`;
+                    }
+                });
+
+                return html || '<div class="report-field"><span class="report-value not-provided">Not provided</span></div>';
+            }
+
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function getCookie(name) {
+                const nameEQ = name + "=";
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    let cookie = cookies[i].trim();
+                    if (cookie.indexOf(nameEQ) === 0) {
+                        return decodeURIComponent(cookie.substring(nameEQ.length));
+                    }
+                }
+                return null;
+            }
+
             // Add voice recording button to the UI
             const fileUploadContainer = document.querySelector('.file-upload-container');
             const voiceButtonHTML = `
@@ -1033,9 +1616,14 @@
             });
             
             // Handle form submission
+            let isSubmitting = false;  // FIX 4: Submission lock to prevent concurrent requests
             chatForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
+                // FIX 4: Check if already submitting
+                if (isSubmitting) return;
+                isSubmitting = true;
+
                 // Get message from input or transcribed text
                 const message = messageInput.value.trim();
                 if (!message && !imageUpload.files.length) return;
@@ -1111,10 +1699,19 @@
                         });
                     }
                     
+                    // FIX 2: Check response.ok before processing
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        const errorMessage = errorData.detail || `HTTP ${response.status}`;
+                        throw new Error(errorMessage);
+                    }
+                    
                     const data = await response.json();
                     
-                    // Remove thinking indicator
-                    chatBody.removeChild(thinkingElement);
+                    // FIX 3: Guard against double removeChild - check if element still in DOM
+                    if (chatBody.contains(thinkingElement)) {
+                        chatBody.removeChild(thinkingElement);
+                    }
                     
                     // Add response to chat
                     const assistantMessageElement = document.createElement('div');
@@ -1123,10 +1720,23 @@
                     // Get clean text for TTS (without markdown)
                     const cleanText = removeMarkdown(data.response);
                     
+                    // Try to render as clinical report if applicable
+                    const clinicalReportHtml = renderClinicalReport(data.response, data.agent);
+                    
                     // Build HTML content for the response with audio controls
                     let assistantHtml = `
                         <div class="agent-tag">${data.agent}</div>
-                        <div>${marked.parse(data.response)}</div>
+                    `;
+
+                    // If it's a structured clinical report, use the special rendering
+                    if (clinicalReportHtml) {
+                        assistantHtml += clinicalReportHtml;
+                    } else {
+                        // Otherwise use standard markdown rendering
+                        assistantHtml += `<div>${marked.parse(data.response)}</div>`;
+                    }
+
+                    assistantHtml += `
                         <div class="audio-controls mt-2">
                             <button class="btn btn-sm btn-outline-primary play-tts-btn">
                                 <i class="fas fa-play"></i> Play Voice Response
@@ -1175,6 +1785,160 @@
                     
                     assistantMessageElement.innerHTML = assistantHtml;
                     chatBody.appendChild(assistantMessageElement);
+
+                    // Attach clinical confirmation handlers if this is a clinical report
+                    if (data.agent.includes('CLINICAL')) {
+                        window.currentSessionId = getCookie('session_id');
+                        
+                        const confirmButton = assistantMessageElement.querySelector('.btn-clinical-confirm');
+                        const feedbackButton = assistantMessageElement.querySelector('.btn-clinical-feedback');
+                        const submitFeedbackButton = assistantMessageElement.querySelector('.btn-submit-feedback');
+                        const cancelFeedbackButton = assistantMessageElement.querySelector('.btn-cancel-feedback');
+                        const feedbackForm = assistantMessageElement.querySelector('.clinical-feedback-form');
+                        const feedbackText = assistantMessageElement.querySelector('#patient-feedback-text');
+
+                        if (confirmButton) {
+                            confirmButton.addEventListener('click', async function() {
+                                // Store patient confirmation locally
+                                const confirmationData = {
+                                    confirmed: true,
+                                    timestamp: new Date().toISOString(),
+                                    session_id: window.currentSessionId
+                                };
+                                
+                                localStorage.setItem(
+                                    `clinical_report_confirmed_${window.currentSessionId}`,
+                                    JSON.stringify(confirmationData)
+                                );
+
+                                // Display success message
+                                const successMsg = document.createElement('div');
+                                successMsg.className = 'confirmation-success-message';
+                                successMsg.innerHTML = `
+                                    <strong>✓ Report Confirmed</strong><br>
+                                    Your report has been confirmed on ${new Date().toLocaleString()}. You can now share it with your healthcare provider.
+                                `;
+                                assistantMessageElement.appendChild(successMsg);
+
+                                // Disable buttons
+                                this.disabled = true;
+                                if (feedbackButton) feedbackButton.disabled = true;
+                                
+                                console.log('Clinical report confirmed by patient');
+                            });
+                        }
+
+                        if (feedbackButton) {
+                            feedbackButton.addEventListener('click', function() {
+                                // Show feedback form
+                                feedbackForm.style.display = 'block';
+                                feedbackText.focus();
+                                
+                                // Hide buttons temporarily
+                                confirmButton.style.display = 'none';
+                                feedbackButton.style.display = 'none';
+                            });
+                        }
+
+                        if (submitFeedbackButton) {
+                            submitFeedbackButton.addEventListener('click', async function() {
+                                const feedback = feedbackText.value.trim();
+                                
+                                if (!feedback) {
+                                    alert('Please enter your corrections or additional information');
+                                    return;
+                                }
+
+                                // Show loading state
+                                submitFeedbackButton.disabled = true;
+                                const originalText = submitFeedbackButton.innerHTML;
+                                submitFeedbackButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                                try {
+                                    // Send feedback to new clinical-patient-feedback endpoint
+                                    const formData = new FormData();
+                                    formData.append('patient_feedback', feedback);
+
+                                    const response = await fetch('/clinical-patient-feedback', {
+                                        method: 'POST',
+                                        body: formData,
+                                        credentials: 'include'
+                                    });
+
+                                    if (!response.ok) {
+                                        const error = await response.json();
+                                        throw new Error(error.detail || 'Failed to process feedback');
+                                    }
+
+                                    const result = await response.json();
+
+                                    // Hide feedback form
+                                    feedbackForm.style.display = 'none';
+
+                                    // Remove old message
+                                    chatBody.removeChild(assistantMessageElement);
+
+                                    // Render updated report
+                                    const updatedReportHtml = renderClinicalReport(
+                                        result.formatted_report,
+                                        result.agent
+                                    );
+
+                                    if (updatedReportHtml) {
+                                        const updatedMessageElement = document.createElement('div');
+                                        updatedMessageElement.className = 'message assistant-message';
+                                        
+                                        let updatedHtml = `
+                                            <div class="agent-tag">CLINICAL_PRE_CONSULTATION_AGENT</div>
+                                            ${updatedReportHtml}
+                                            <div class="audio-controls mt-2">
+                                                <button class="btn btn-sm btn-outline-primary play-tts-btn">
+                                                    <i class="fas fa-play"></i> Play Voice Response
+                                                </button>
+                                            </div>
+                                        `;
+
+                                        updatedMessageElement.innerHTML = updatedHtml;
+                                        chatBody.appendChild(updatedMessageElement);
+
+                                        // Scroll to updated report
+                                        chatBody.scrollTop = chatBody.scrollHeight;
+
+                                        // Re-attach handlers to the new element
+                                        const newConfirmButton = updatedMessageElement.querySelector('.btn-clinical-confirm');
+                                        if (newConfirmButton) {
+                                            newConfirmButton.click = function() {
+                                                this.click();
+                                            };
+                                        }
+                                    }
+
+                                    console.log('Patient feedback processed and report updated');
+                                } catch (error) {
+                                    console.error('Error processing feedback:', error);
+                                    const errorMsg = document.createElement('div');
+                                    errorMsg.className = 'confirmation-error-message';
+                                    errorMsg.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                                    feedbackForm.appendChild(errorMsg);
+                                } finally {
+                                    submitFeedbackButton.disabled = false;
+                                    submitFeedbackButton.innerHTML = originalText;
+                                }
+                            });
+                        }
+
+                        if (cancelFeedbackButton) {
+                            cancelFeedbackButton.addEventListener('click', function() {
+                                // Hide feedback form
+                                feedbackForm.style.display = 'none';
+                                feedbackText.value = '';
+                                
+                                // Show buttons again
+                                confirmButton.style.display = 'inline-block';
+                                feedbackButton.style.display = 'inline-block';
+                            });
+                        }
+                    }
 
                     // Attach validation button events if human validation is required
                     if (data.agent.includes("HUMAN_VALIDATION")) {
@@ -1274,17 +2038,45 @@
                     
                 } catch (error) {
                     console.error("Error:", error);
-                    // Remove thinking indicator
-                    chatBody.removeChild(thinkingElement);
+                    // FIX 3: Guard against double removeChild
+                    if (chatBody.contains(thinkingElement)) {
+                        chatBody.removeChild(thinkingElement);
+                    }
                     
-                    // Add error message
+                    // Add error message with specific handling for provider failures
                     const errorElement = document.createElement('div');
                     errorElement.className = 'message assistant-message';
+                    
+                    // Check if this is a provider failure (HTTP 503)
+                    let displayErrorMessage = "Sorry, there was an error processing your request. Please try again.";
+                    let isProviderFailure = false;
+                    
+                    if (error && error.message) {
+                        if (error.message.includes("503") || error.message.includes("service_unavailable")) {
+                            isProviderFailure = true;
+                            displayErrorMessage = `
+                                <strong>⚠️ AI Services Temporarily Unavailable</strong><br><br>
+                                The medical AI providers have temporarily reached their usage limits. 
+                                Your consultation session has been saved and you can resume it later.<br><br>
+                                <strong>What to do:</strong>
+                                <ul>
+                                    <li>Try again in a few moments</li>
+                                    <li>Your session data is preserved - just refresh and continue</li>
+                                </ul>
+                            `;
+                        } else {
+                            displayErrorMessage = error.message;
+                        }
+                    }
+                    
                     errorElement.innerHTML = `
                         <div class="agent-tag">System</div>
-                        <p class="text-danger">Sorry, there was an error processing your request. Please try again.</p>
+                        <p class="${isProviderFailure ? 'text-warning' : 'text-danger'}">${displayErrorMessage}</p>
                     `;
                     chatBody.appendChild(errorElement);
+                } finally {
+                    // FIX 4: Release submission lock in finally block
+                    isSubmitting = false;
                 }
                 
                 // Scroll to bottom again

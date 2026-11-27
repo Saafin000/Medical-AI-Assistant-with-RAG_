@@ -11,6 +11,22 @@ from langchain_qdrant import FastEmbedSparse, QdrantVectorStore, RetrievalMode
 from qdrant_client import QdrantClient, models
 from qdrant_client.http.models import Distance, SparseVectorParams, VectorParams, OptimizersConfigDiff
 
+import threading
+
+class QdrantClientManager:
+    """Thread-safe singleton manager for local QdrantClient storage to prevent portalocker lock contention."""
+    _instances: Dict[str, QdrantClient] = {}
+    _lock = threading.Lock()
+
+    @classmethod
+    def get_client(cls, path: str) -> QdrantClient:
+        abs_path = os.path.abspath(path)
+        with cls._lock:
+            if abs_path not in cls._instances:
+                cls._instances[abs_path] = QdrantClient(path=abs_path)
+            return cls._instances[abs_path]
+
+
 class VectorStore:
     """
     Create vector store, ingest documents, retrieve relevant documents
@@ -26,9 +42,8 @@ class VectorStore:
         self.vectorstore_local_path = config.rag.vector_local_path
         self.docstore_local_path = config.rag.doc_local_path
 
-        # Use the singleton client instead of creating a new one
-        # self.client = QdrantClientManager.get_client(config)
-        self.client = QdrantClient(path=self.vectorstore_local_path)
+        # Use singleton client to prevent file lock collision on local Qdrant directory
+        self.client = QdrantClientManager.get_client(self.vectorstore_local_path)
 
     def _does_collection_exist(self) -> bool:
         """Check if the collection already exists in Qdrant."""

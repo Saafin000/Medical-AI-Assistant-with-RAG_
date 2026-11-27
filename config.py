@@ -11,38 +11,62 @@ Each llm definition has unique temperature value relevant to the specific class.
 """
 
 import os
+import re
 from dotenv import load_dotenv
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_openai import AzureChatOpenAI
-from langchain_groq import ChatGroq
+
+
+def is_elevenlabs_key_id(value: str) -> bool:
+    """Return True if value matches ElevenLabs' 64-hex API Key ID format instead of an 'sk_' secret key."""
+    if not value or not isinstance(value, str):
+        return False
+    cleaned = value.strip()
+    return bool(re.fullmatch(r"[0-9a-fA-F]{64}", cleaned)) and not cleaned.startswith("sk_")
 
 # Load environment variables from .env file
-load_dotenv()
+# Ensure .env is resolved reliably regardless of current working directory
+_config_dir = os.path.dirname(os.path.abspath(__file__))
+_local_env = os.path.join(_config_dir, ".env")
+_parent_env = os.path.join(os.path.dirname(_config_dir), ".env")
+
+if os.path.isfile(_local_env):
+    load_dotenv(dotenv_path=_local_env)
+elif os.path.isfile(_parent_env):
+    load_dotenv(dotenv_path=_parent_env)
+else:
+    load_dotenv()
+
+# Import provider adapter for Groq and LLM providers
+try:
+    from provider_config_adapter import get_llm_provider, get_groq_provider, LLM_PROVIDER_FALLBACK_ENABLED
+except ImportError as e:
+    raise ImportError(
+        f"Failed to import provider configuration adapter: {e}. "
+        f"Make sure groq_llm_provider.py and provider_config_adapter.py are present."
+    )
 
 class AgentDecisoinConfig:
     def __init__(self):
-        self.llm = ChatGroq(
-            model="qwen/qwen3.8-27b",
+        self.llm = get_groq_provider(
             temperature=0.1,  # Deterministic
-            api_key=os.getenv("GROQ_API_KEY")
+            max_tokens=300,   # Tiny JSON decision output; prevents 8K token reservation
         )
 
 class ConversationConfig:
     def __init__(self):
-        self.llm = ChatGroq(
-            model="qwen/qwen3.8-27b",
+        self.llm = get_groq_provider(
             temperature=0.7,  # Creative but factual
-            api_key=os.getenv("GROQ_API_KEY")
+            max_tokens=600,   # Generous for dialogue while fitting comfortably within Groq daily quotas
         )
 
 class WebSearchConfig:
     def __init__(self):
-        self.llm = ChatGroq(
-            model="qwen/qwen3.8-27b",
+        self.llm = get_groq_provider(
             temperature=0.3,  # Slightly creative but factual
-            api_key=os.getenv("GROQ_API_KEY")
+            max_tokens=600,
         )
-        self.context_limit = 20     # include last 20 messsages (10 Q&A pairs) in history
+        self.context_limit = 20     # include last 20 messages (10 Q&A pairs) in history
 
 class RAGConfig:
     def __init__(self):
@@ -77,10 +101,9 @@ class RAGConfig:
             raise RuntimeError(
                 f"Failed to initialize HuggingFace embeddings (model: sentence-transformers/all-MiniLM-L6-v2, device: cpu): {e}"
             ) from e
-        self.llm = ChatGroq(
-            model="qwen/qwen3.8-27b",
+        self.llm = get_groq_provider(
             temperature=0.3,  # Slightly creative but factual
-            api_key=os.getenv("GROQ_API_KEY")
+            max_tokens=600,
         )
         # Initialize Azure summarizer_model (for image text extraction) - lazy-loaded if vars are set
         deployment_name = os.getenv("deployment_name")
@@ -95,15 +118,13 @@ class RAGConfig:
             )
         else:
             self.summarizer_model = None
-        self.chunker_model = ChatGroq(
-            model="qwen/qwen3.8-27b",
+        self.chunker_model = get_groq_provider(
             temperature=0.0,  # factual
-            api_key=os.getenv("GROQ_API_KEY")
+            max_tokens=500,
         )
-        self.response_generator_model = ChatGroq(
-            model="qwen/qwen3.8-27b",
+        self.response_generator_model = get_groq_provider(
             temperature=0.3,  # Slightly creative but factual
-            api_key=os.getenv("GROQ_API_KEY")
+            max_tokens=600,
         )
         self.top_k = 5
         self.vector_search_type = 'similarity'  # or 'mmr'
@@ -121,6 +142,18 @@ class RAGConfig:
         self.min_retrieval_confidence = 0.40  # The auto routing from RAG agent to WEB_SEARCH agent is dependent on this value
 
         self.context_limit = 20     # include last 20 messsages (10 Q&A pairs) in history
+
+class ClinicalConsultationConfig:
+    def __init__(self):
+        self.llm = get_groq_provider(
+            temperature=0.3,  # Structured, factual, conversational
+            max_tokens=700,
+        )
+        self.context_limit = 30  # Include more history for contextual understanding
+        self.max_followup_questions = 8  # Maximum adaptive follow-up questions before mandatory confirmation
+        self.emergency_keywords = ["chest pain", "difficulty breathing", "severe bleeding", "loss of consciousness"]
+        self.patient_db_path = "./data/clinical_consultation_db"  # Path for patient data storage
+
 
 class MedicalCVConfig:
     def __init__(self):
@@ -144,8 +177,14 @@ class MedicalCVConfig:
 
 class SpeechConfig:
     def __init__(self):
-        self.eleven_labs_api_key = os.getenv("ELEVEN_LABS_API_KEY")  # Replace with your actual key
-        self.eleven_labs_voice_id = "21m00Tcm4TlvDq8ikWAM"    # Default voice ID (Rachel)
+        raw_key = os.getenv("ELEVEN_LABS_API_KEY", "")
+        self.eleven_labs_api_key = raw_key.strip() if raw_key else ""
+        self.eleven_labs_voice_id = "EXAVITQu4vr4xnSDxMaL"  # Default premade voice (Sarah)
+        if is_elevenlabs_key_id(self.eleven_labs_api_key):
+            print(
+                "Warning: ELEVEN_LABS_API_KEY appears to be a 64-char ElevenLabs API Key ID "
+                "rather than an API secret key (expected prefix 'sk_'). STT and TTS requests will fail authentication."
+            )
 
 class ValidationConfig:
     def __init__(self):
@@ -182,11 +221,13 @@ class Config:
         self.rag = RAGConfig()
         self.medical_cv = MedicalCVConfig()
         self.web_search = WebSearchConfig()
+        self.clinical_consultation = ClinicalConsultationConfig()
         self.api = APIConfig()
         self.speech = SpeechConfig()
         self.validation = ValidationConfig()
         self.ui = UIConfig()
-        self.eleven_labs_api_key = os.getenv("ELEVEN_LABS_API_KEY")
+        raw_key = os.getenv("ELEVEN_LABS_API_KEY", "")
+        self.eleven_labs_api_key = raw_key.strip() if raw_key else ""
         self.max_conversation_history = 20  # Include last 20 messsages (10 Q&A pairs) in history
 
 # # Example usage
